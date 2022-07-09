@@ -1,0 +1,45 @@
+{% extends 'RIT/layout.html' %}
+
+{% block title %}
+    Report An Incident
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-10">
+        <div id="dialog-form" title="Close An Incident">
+            <p class="validateTips">INCIDENT DETAILS: All form fields are required.</p>
+           
+            <form class="form-group" method="POST" action="{% url 'incidentForm' %}">
+              {% csrf_token %}
+              <fieldset><label> INCIDENT DATE</label>
+                <input type="datetime-local" required name="incident_date" id="name" placeholder="Incident Date" class="form-control text ui-widget-content ui-corner-all">
+                <label for="incident_department">INCIDENT DEPARTMENT</label>
+                <input type="text" required name="incident_department" id="incident_department" placeholder="IT" class="form-control text ui-widget-content ui-corner-all">
+                <label for="incident_topic">INCIDENT TOPIC</label>
+                <input type="text" required name="incident_topic" placeholder="INCIDENT TOPIC" id="incident_topic" class="form-control text ui-widget-content ui-corner-all">
+                <label for="incident_description">INCIDENT DESCRIPTION</label>
+                <textarea name="incident_description" required rows="5" cols="60" id="incident_description" class="form-control text ui-widget-content ui-corner-all"></textarea>
+                <label for="incident_priority">PRIORITY</label>
+                <select name="incident_priority" class="form-control text ui-widget-content ui-corner-all">
+                    <option value="Mild">Mild</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Critical">Critical</option>
+                </select>            
+                <input type="hidden" value="pending" class="form-control text ui-widget" name="incident_status" id="incident_status" />
+                <!-- Allow form submission with keyboard without duplicating the dialog button -->
+                <input class="btn btn-secondary form-control" type="submit" value="Submit Ticket" tabindex="-1">
+              </fieldset>
+            </form>
+          </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+

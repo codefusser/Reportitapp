@@ -1,0 +1,137 @@
+{% extends 'RIT/layout.html' %}
+
+
+{% block title %}
+    ResolveIT | LogIn
+{% endblock %}
+
+{% block body %}
+{% if username %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-10">
+            <ul>
+                <li><a href="{% url 'incidentForm' %}">Report An Incident</a></li>
+                <li><a href="{% url 'dashboard' %}">Resolve An Incident</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-10">
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">TICKET#</th>
+                    <th scope="col">INCIDENTS</th>
+                    <th scope="col">DESCRIPTION</th>
+                    <th scope="col"> INCIDENT DEPARTMENT</th>
+                    <th scope="col">STATUS</th>
+                    <th scope="col">SEVERITY</th>
+                    <th scope="col">RESOLUTION</th>
+                    <th scope="col">REPORTED DATE</th>
+                    <th scope="col">RESOLVED DATE</th>
+                </tr>
+                </thead>
+            {% endif %}
+
+                <tbody>
+                    {% if incidents is not None %}
+                        {% for incident in incidents %}
+                        <tr>
+                            <td>{{ incident.incident_ticket }}</td>
+                            <td>{{ incident.incident_topic }}</td>
+                            <td>{{ incident.incident_description }}</td>
+                            <td>{{ incident.incident_department }}</td>
+                            <td>{{ incident.incident_status }}
+                                <!--<div class="status_update"><a href="#" class="status_alert">No status update</a></div>-->
+                            </td>
+                            <td>{{ incident.incident_priority }}</td>
+                            <td>{{ incident.incident_resolution }}</td>
+                            <td>{{ incident.incident_date }}</td>
+                            <td>{{ incident.incident_resolved_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td>No Incidents!</td></tr>
+                        
+                       
+                    {% endif %}
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+    {% block scripts %}
+        <script>
+            
+                $(document).ready(()=> {
+
+                    var status_update = document.getElementsByClassName('status_update');
+
+                    for(let i = 0; i < status_update.length; i++){
+                            status_update[i].addEventListener('click', function(){
+                                var j = i + 1;
+                                alert($('.status_alert')[i].innerText);
+                            });
+                        }
+
+                    function getCookie(name) {
+                        let cookieValue = null;
+                        if (document.cookie && document.cookie !== '') {
+                            const cookies = document.cookie.split(';');
+                            for (let i = 0; i < cookies.length; i++) {
+                                const cookie = cookies[i].trim();
+                                // Does this cookie string begin with the name we want?
+                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                }
+                            }
+                        }
+                        return cookieValue;
+                    }
+
+                    const csrftoken = getCookie('csrftoken');
+                    var department_list = $(".department_list");
+
+                    department_list.change(() => {
+                    var selected_department = department_list.val();
+                    var data = {'selected_department' : selected_department};
+
+                    // query the DB with the selected option
+                    var request = new Request(
+                        URL = './'
+                    )
+
+                    var myheaders = new Headers();
+                    myheaders.append('X-CSRFToken',csrftoken);
+                    myheaders.append('Content-Type', 'text/html; charset=UTF-8');
+
+                    const init = {
+                        method : "POST",
+                        mode: 'same-origin',
+                        headers: myheaders,
+                        body: JSON.stringify(data)
+                    }
+
+                    fetch(request, init).then((response)=> {
+                        //alert("selected department is " + selected_department);
+                        response.json();
+                    }).then((res) => {
+                        alert(res);
+                        console.log(res);
+                    });
+                    });
+
+                });
+
+        </script>
+   {% endblock %}
+

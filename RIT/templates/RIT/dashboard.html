@@ -1,0 +1,492 @@
+{% extends 'RIT/layout.html' %}
+
+{% block title %}
+  {% if department %}
+      ResolveIT | Dashboard | {{ department }}
+  {% else %}
+      ResolveIT | Dashboard
+  {% endif %}
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row mt-5">
+        <div class="col-2">
+         <!--   Display a pane with list of departments --> 
+            <div class="mb-4">DEPARTMENT</div>
+            <div><a href="/RIT/" target="dashboard">ALL</a></div>
+            <div><a href="/RIT/administration">ADMINISTRATION</a></div>
+            <div><a href="/RIT/hardware/">HARDWARE</a></div>
+            <div><a href="/RIT/development">DEVELOPMENT</a></div>
+            <div><a href="/RIT/it" rel="noopener">IT SERVICE DESK</a></div>
+
+        <!--    <div><a href="{% url 'dept_dashboard' 'maintenance' %}">MAINTENANCE</a></div>
+            <div><a href="/RIT/dashboard/IT">IT SERVICE DESK</a></div> --> 
+        </div>  
+     <!--    <div class="modal" tabindex="-1" id="close_ticket_modal">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Close Ticket</h5>
+                  <button type="button" class="btn-close" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary">Close</button>
+                  <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+        </div> -->
+
+       <!-- Implements a dialog form for updating incidents' statuses -->
+      <div id="dialog-form" title="Close/Update An Incident">
+        <p class="validateTips">All form fields are required.</p>
+       
+        <form id="frmIncident">
+          <fieldset><strong>INCIDENT #</strong><span id="ticket_number"></span>
+            <label for="incident_topic">INCIDENT TOPIC</label>
+            <input type="text" name="incident_topic" required disabled id="incident_topic" placeholder="Incident Title" class="text ui-widget-content ui-corner-all">
+            <label for="incident_department">DEPARTMENT</label>
+            <select class="department_list" name="incident_department">
+              <option>INCIDENT DEPARTMENT</option>
+              <option value="IT">IT</option>
+              <option value="ADMINISTRATION">ADMINISTRATION</option>
+              <option value="DEVELOPMENT">DEVELOPMENT</option>
+              <option value="HARDWARE">HARDWARE</option>
+            </select>
+            <input type="text" required disabled name="incident_department" id="incident_department" placeholder="IT" class="text ui-widget-content ui-corner-all">
+            <label for="incident_resolution">INCIDENT RESOLUTION/UPDATE</label>
+            <textarea name="incident_resolution" placeholder="describe resolution" required rows="5" cols="33" id="incident_resolution" class="text ui-widget-content ui-corner-all"></textarea>
+            <label for="incident_status">STATUS</label>
+            <select id="incident_status" required title="Select Incident status" data-toggle="tooltip" name="incident_status" class="text ui-widget-content ui-corner-all">
+                <option value="Pending">Pending</option>
+                <option value="Resolved">Resolved</option>
+            </select>            
+            <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <!-- <button type="submit" id="resolve_btn" data-toggle="tooltip" title="Resolve" tabindex="-1" style="position:absolute;"> Close Ticket</button>
+            <button type="submit" id="update_btn" data-toggle="tooltip" title="Update(Status:Pending)" tabindex="-1" style="position:absolute;"> Update Ticket</button>-->
+          </fieldset>
+        </form>
+      </div>
+
+      <!--  <h1>Existing Users:</h1>
+        <table id="users" class="ui-widget ui-widget-content">
+          <thead>
+            <tr class="ui-widget-header ">
+              <th>Name</th>
+              <th>Email</th>
+              <th>Password</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>John Doe</td>
+              <td>john.doe@example.com</td>
+              <td>johndoe1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div> -->
+          
+
+      <!-- Dashboard list of all incidents and their statuses -->
+        <div class="col-10">
+          <div class="float-right mr-5">
+            <!-- <button class="btn btn-secondary close_ticket">Close Ticket</button> 
+            <button class="btn btn-primary" id="update_status">Status Update</button>-->
+          </div>
+
+            <!--<div class="row btn btn-secondary float-right" data-bs-toggle="modal" id="close_ticket">Close Ticket</div>-->
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">TICKET#</th>
+                    <th scope="col">INCIDENTS</th>
+                    <th scope="col"> INCIDENT DEPARTMENTS
+                      <!--<form>
+                        <select class="department_list" name="incident_department">
+                          <option>INCIDENT DEPARTMENT</option>
+                          <option value="IT">IT</option>
+                          <option value="ADMINISTRATION">ADMINISTRATION</option>
+                          <option value="DEVELOPMENT">DEVELOPMENT</option>
+                          <option value="HARDWARE">HARDWARE</option>
+                        </select>
+                      </form>-->
+                    </th>
+                    <th scope="col">DESCRIPTION</th>
+                    <th scope="col">STATUS</th>
+                    <th scope="col">SEVERITY</th>
+                    <th scope="col">RESOLUTION</th>
+                    <th scope="col">REPORTED DATE</th>
+                    <th scope="col">RESOLVED DATE</th>
+                </tr>
+                </thead>
+                <tbody>
+                  {% if incidents  %}
+                  {% for incident in incidents %}
+                  <tr>
+                    {% if user_admin %}
+                      <td class="incident_ticket"><a href="#" class="close_ticket">{{ incident.incident_ticket }}</a></td>
+                    {% else %}
+                      <td class="incident_ticket">{{ incident.incident_ticket }}</td>
+                    {% endif %}
+
+                    <td class="incident_topic">{{ incident.incident_topic }} 
+                    </td>
+                    <td class="incident_department"> {{ incident.incident_department }} </td>
+                    <td class="incident_description"> {{ incident.incident_description }}</td>
+                    <td class="incident_update">{{ incident.incident_status }}
+                      <!--<div class="status_update"><a href="./incidentStatus" class="status_alert">No status update</a></div>-->
+                    </td>
+                    <td class="incident_status">{{ incident.incident_priority }}</td>
+                    {% if incident.incident_resolution %}                    
+                      <td class="incident_resolution">{{ incident.incident_resolution }}</td>              
+                    {% else %}
+                      <td>No resolution</td>
+                    {% endif %}
+                    <td class="incident_report_date">{{ incident.incident_date }}</td>
+                    <td class="incident_resolved_date"> {{ incident.incident_resolved_date }}</td>
+                  </tr>
+                  {% endfor %}
+                  {% endif %}
+                
+                </tbody>
+            </table>
+        </div>
+    </div>
+  </div>
+{% endblock %}
+
+    {% block scripts %}
+        <script>
+
+      $(document).ready(function(){
+
+        // create cookie CSRF value for post requests
+        function getCookie(name) {
+              let cookieValue = null;
+              if (document.cookie && document.cookie !== '') {
+                  const cookies = document.cookie.split(';');
+                  for (let i = 0; i < cookies.length; i++) {
+                      const cookie = cookies[i].trim();
+                      // Does this cookie string begin with the name we want?
+                      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                          break;
+                      }
+                  }
+              }
+              return cookieValue;
+          }
+
+        const csrftoken = getCookie('csrftoken');
+
+        // display form elements tooltips
+        
+        $(function() {
+              $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        // close ticket with an update
+        var status_dialog_frm = $("#dialog-form-status");
+        status_dialog_frm.hide();
+        $("#dialog-form").hide();
+
+        // update an incident status
+        function update()
+        {
+            //alert("issue updated");
+            // define header values
+            let myheaders = new Headers();
+            myheaders.append('X-CSRFToken', csrftoken);
+            myheaders.append('Content-Type', 'text/html; charset=UTF-8');
+
+            // define form data as dictionary
+            data = {'incident_topic': $("#incident_topic").val(), 'incident_ticket' : $("#ticket_number").html(), 'incident_department': $("#incident_department").val(),
+                    'incident_resolution': $("#incident_resolution").val(), 'incident_status': $("#incident_status").val()}
+                      
+            // define post initialization
+            const init = {
+              method : "POST",
+              mode: 'same-origin',
+              headers: myheaders,
+              body: JSON.stringify(data)
+            }
+
+            //alert(init.body);
+            // validate form data
+            if(data['incident_status'] != 'Pending')
+            {
+              alert("adjust incident status!");
+              return;
+            }
+
+            // post data to server
+            let request = new Request(
+              url= './resolveIncident/'
+            );
+
+            fetch(request,init).then((response)=>{
+              if(response.ok)
+              {
+
+                alert("incident updated");
+                location.reload();
+              }
+              else
+              {
+                alert("incident update failed");
+              }
+              //alert("updated!");
+              
+            });
+        }
+
+        // resolve an incident
+        function resolve()
+        {
+          // define header values
+          let myheaders = new Headers();
+          myheaders.append('X-CSRFToken', csrftoken);
+          myheaders.append('Content-Type', 'text/html; charset=UTF-8');
+
+          data = {'incident_ticket':$("#ticket_number").text(), 'incident_topic': $("#incident_topic").val(), 'incident_department': $("#incident_department").val(),
+                  'incident_resolution': $("#incident_resolution").val(), 'incident_status': $("#incident_status").val()}
+         
+        
+          // define post initialization
+          const init = {
+            method : "POST",
+            mode: 'same-origin',
+            headers: myheaders,
+            body: JSON.stringify(data)
+          }
+
+          // validate form data
+          if(data['incident_status'] != 'Resolved')
+          {
+            alert("adjust incident status!");
+            return;
+          }
+          
+          // post data to server
+          let request = new Request(
+            url= './resolveIncident/'
+          );
+
+          fetch(request, init).then((response)=>{
+            location.reload();
+          });
+        }
+        
+        // open dialog for status update to resolve/update an incident
+        var dialog = $( "#dialog-form" ).dialog({
+            autoOpen: false,
+            height: 400,
+            width: 350,
+            modal: true,
+            buttons: {
+              "Close Ticket": resolve,
+              'Update Ticket': update,
+              Cancel: function() {
+                dialog.dialog( "close" );
+              }
+            },
+            close: function() {
+              //form[ 0 ].reset();
+              //allFields.removeClass( "ui-state-error" );
+            }
+          });
+          // form = dialog.find( "form" ).on( "submit", function( event ) {
+          //   event.preventDefault();
+          //   addUser();
+          // });
+          
+          // populate dialog with incident data
+          var incident_topic = $(".incident_topic"), incident_department = $(".incident_department"), 
+                  incident_ticket = $(".incident_ticket"), incident_status = $(".incident_status"), close_ticket = (".close_ticket")
+            
+        $( ".close_ticket" ).button().on( "click", function(evt) {
+            evt.preventDefault();
+            for (let i=0; i < incident_ticket.length; i++)
+            {                  
+                //alert(incident_department.text());
+                $("#incident_department").val(incident_department[i].innerText);
+                $("#incident_status").val(incident_status[i].innerText);
+                $("#ticket_number").text(this.innerText);
+                //alert(this.innerText);
+                $("#incident_topic").val(incident_topic[i].innerText);
+          
+                dialog.dialog( "open" );   
+                break;
+            }
+          }); 
+
+
+          // display status update dialog when clicked
+          var status_update = document.getElementsByClassName('status_update');
+
+          $(".status_update").button().on("click", function(evt) {
+            evt.preventDefault();
+            for(let i = 0; i < status_update.length; i++)
+            {                                 
+              // define header values
+              let url = './incidentStatus/';
+              let myheaders = new Headers();
+              myheaders.append('X-CSRFToken', csrftoken);
+              myheaders.append('Content-Type', 'text/html; charset=UTF-8');
+
+              let incident_ticket_status = incident_ticket[i].innerText;
+              //alert(incident_ticket_status);
+
+              // define post initialization
+              const init = {
+                method : "POST",
+                mode: 'same-origin',
+                headers: myheaders,
+                body: JSON.stringify({'incident_ticket':incident_ticket_status})
+              }    
+
+              // send ticket number to server
+              let request = new Request(url,init);
+
+              fetch(request).then((response)=>{
+                if(response.ok)
+                {
+                  alert("incident status updated");
+                  location.reload();
+                }
+                else
+                {
+                  alert("incident status update failed");
+                }
+              });
+              //});              
+              break;
+            }
+            /*const get_init = {method: "GET", mode: 'same-origin'};
+              let get_request = new Request(url,get_init);
+
+              fetch(get_request).then((response)=>{
+                if(response.ok)
+                {
+                  response.json().then((data)=>{
+                    alert(data);
+                    //alert(data[0]['incident_status']);
+                  })
+                }
+              }); 
+              //alert($('.status_alert')[i].innerText);
+              */
+          });
+          /*
+          for(let i = 0; i < status_update.length; i++)
+          {           
+              status_update[i].addEventListener('click', function(evt){
+              evt.preventDefault();          
+              // define header values
+              let url = './incidentStatus/';
+              let myheaders = new Headers();
+              myheaders.append('X-CSRFToken', csrftoken);
+              myheaders.append('Content-Type', 'text/html; charset=UTF-8');
+
+              let incident_ticket_status = incident_ticket[i].innerText;
+              alert(incident_ticket_status);
+
+              // define post initialization
+              const init = {
+                method : "POST",
+                mode: 'same-origin',
+                headers: myheaders,
+                body: JSON.stringify({'incident_ticket':incident_ticket_status})
+              }    
+
+              // send ticket number to server
+              let request = new Request(url,init);
+              fetch(request).then((response)=>{
+                if(response.ok)
+                {
+                  //alert("incident status updated");
+                  location.reload();
+                }
+                else
+                {
+                  alert("incident status update failed");
+                }
+              }).then((data)=>{
+                  alert("data" + data);
+                });
+              //});
+
+
+              fetch(url).then((response)=>{
+                if(response.ok)
+                {
+                  response.json().then((data)=>{
+                    //alert(data);
+                    //alert(data[0]['incident_status']);
+                  })
+                }
+              }); 
+              alert($('.status_alert')[i].innerText);
+          });
+        }
+        */
+        // var status_dialog = status_dialog_frm.dialog({
+        //       autoOpen: false,
+        //       height: 400,
+        //       width: 350,
+        //       modal: true,
+        //       buttons: {
+        //         'Update Status': update,
+        //         'Close Incident': update,
+        //         Cancel: function() {
+        //           status_dialog.dialog( "close" );
+        //         }
+        //       }
+        //     });
+      
+        $("#update_status").click(function(){
+            status_dialog.dialog('open');
+        });
+     
+
+        // implement filtering of incident list by department using select menu
+          var department_list = $(".department_list");
+
+            department_list.change(() => {
+              var selected_department = department_list.val();
+              var data = {'selected_department' : selected_department};
+
+              // query the DB with the selected option
+              var request = new Request(
+                URL = './'
+              )
+
+              var myheaders = new Headers();
+              myheaders.append('X-CSRFToken',csrftoken);
+              myheaders.append('Content-Type', 'text/html; charset=UTF-8');
+
+              const init = {
+                method : "POST",
+                mode: 'same-origin',
+                headers: myheaders,
+                body: JSON.stringify(data)
+              }
+
+              fetch(request, init).then((response)=> {
+                  response.json();
+              }).then((res)=> {
+                  alert(res.err);
+              });
+            });
+      });
+
+      </script>    
+
+    {% endblock %}

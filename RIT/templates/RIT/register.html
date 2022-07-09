@@ -1,0 +1,49 @@
+{% extends 'RIT/layout.html' %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <div>
+                {% if message %}
+                    <p style="background-color:peru;"> {{ message }} </p>
+                {% endif %}
+                <form method="POST" action="{% url 'register' %}" enctype="application/x-www-form-urlencoded">
+                    {% csrf_token %}
+                    <div class="form-group">
+                       <input type="text" required placeholder="username" name="username" id="username" class="form-control" />
+                        <input type="password" required placeholder="password" name="password" id="password" class="form-control" />
+                        <input type="password" required placeholder="confirm password" name="confirm_password" id="confirm_password" class="form-control" />
+                        <input type="email" placeholder="email" id="email" name="email" class="form-control" />
+                        <select class="form form-control department_list" name="department">
+                            <option>INCIDENT DEPARTMENT</option>
+                            <option value="IT">IT</option>
+                            <option value="ADMINISTRATION">ADMINISTRATION</option>
+                            <option value="DEVELOPMENT">DEVELOPMENT</option>
+                            <option value="HARDWARE">HARDWARE</option>
+                          </select>
+                        <!--<input type="text" required placeholder="department" name="department" id="department" class="form-control" />-->
+                        <input type="text" required placeholder="firstname" name="firstname" id="firstname" class="form-control" />
+                        <input type="text" required placeholder="lastname" name="lastname" id="lastname" class="form-control" />
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" name="user_role" type="checkbox" id="flexSwitchCheckDefault">
+                            <label class="form-check-label" for="flexSwitchCheckDefault">Admin</label>
+                        </div>
+                        
+                        <input type="submit" id="btnregister" value="Register" class="btn btn-secondary float-right" />
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        <div class="col-3"></div>
+    </div>
+
+    {% block scripts %}
+        
+    {% endblock %}
+{% endblock %}
