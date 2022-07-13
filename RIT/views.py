@@ -192,8 +192,8 @@ class WebApp():
             # when status update is pending
             if incident_status == "Pending":
                 # call the StatusUpdatedb
-                incident_ticket = Incidentdb.objects.get(incident_ticket=incident_ticket_no)
-                update_incident = StatusUpdatedb.objects.create(username_id = username, incident_id = incident_ticket, incident_status_update = incident_status_update, 
+                #incident_ticket = Incidentdb.objects.get(incident_ticket=incident_ticket_no)
+                update_incident = StatusUpdatedb.objects.create(username_id = username, incident_id = incident_ticket_no, incident_status_update = incident_status_update, 
                         update_date = datetime.now())
                 incidents = Incidentdb.objects.all()
                 return render(request, 'RIT/dashboard.html', {'incidents':incidents, 'username': request.session['username']})
