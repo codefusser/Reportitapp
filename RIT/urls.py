@@ -9,7 +9,7 @@ from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
-    path('', views.WebApp.dashboard, name='dashboard'),
+    path('', views.WebApp.redirect_route, name='redirect_route'),
     #path('RIT/', views.WebApp.index, name='index'),
     path('RIT/login/', views.WebApp.login, name='login'),
     path('RIT/register/', views.WebApp.register, name='register'),
