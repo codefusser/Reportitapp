@@ -8,7 +8,10 @@ from django.urls import reverse
 from .models import Resolutiondb, Incidentdb, StatusUpdatedb, Userdb
 
 # Create your views here.
-class WebApp():        
+class WebApp():   
+    def redirect_route(request):
+        return HttpResponseRedirect("/RIT/")
+    
     def index(request):
         try:
             if request.session['username'] is not None:
