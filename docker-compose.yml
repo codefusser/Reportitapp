@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+   db:
+     image: postgres
+     restart: unless-stopped
+     volumes:
+       - codebase:/var/lib/postgresql/data
+     environment:
+       - POSTGRES_DB=Userdb
+       - POSTGRES_USER=admin
+       - POSTGRES_PASSWORD=passw0rd@2022
+
+   web:
+     build: .
+     command: python ./Reportitapp/manage.py runserver 0.0.0.0:8000
+     volumes:
+       - .:/codebase
+     ports:
+       - "8000:8000"
+     environment:
+       - POSTGRES_DB=Userdb
+       - POSTGRES_USER=admin
+       - POSTGRES_PASSWORD=passw0rd@2022
+     depends_on:
+       - db
+
+volumes:
+  codebase:
+    external: true
